@@ -4,11 +4,14 @@
 #and poverty pct per county/year
 
 #Import the required ArcPy and custom modules
+import time
 import arcpy
 from arcpy import env
 from arcpy.da import *
 import commonArcPyValidate
 import commonArcPyProcessing
+
+start_time = time.time()
 
 #Override environment variables
 #allow output to be overwritten
@@ -227,4 +230,4 @@ else:
     print "Spatial License not available"
 
 
-
+print("--- %s seconds ---" % (time.time() - start_time))
