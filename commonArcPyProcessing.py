@@ -136,23 +136,23 @@ def processAnnualData(landuseYear, povertyYear, txCountyLayer, txCountyName, out
         updateSearchWhereClause =  'NAME = '+"'"+str(txCountyName) + "'"
         print "updateSearchWhereClause: {0}".format(updateSearchWhereClause)
         if (landuseYear == "1992"):
-            cursorFields = ["cnt1992",  "aguse1992", "povpct1990"]
+            cursorFields = ["cnt1992",  "aguse1992", "povpct1990", "cropct1992", "AREA_SQKM"]
         elif (landuseYear == "2001"):
-            cursorFields = ["cnt2001",  "aguse2001", "povpct2000"]
+            cursorFields = ["cnt2001",  "aguse2001", "povpct2000", "cropct2001", "AREA_SQKM"]
         elif (landuseYear == "2006"):
-            cursorFields = ["cnt2006",  "aguse2006"]
+            cursorFields = ["cnt2006",  "aguse2006", "cropct2006", "AREA_SQKM"]
         elif (int(landuseYear) > 2006 and int(landuseYear) < 2016 ):
-            cursorFields = ["cnt"+landuseYear,  "aguse"+landuseYear, "povpct"+landuseYear, "top3_"+landuseYear, "bot3_"+landuseYear,"sc"+landuseYear,"cntsc"+landuseYear]
+            cursorFields = ["cnt"+landuseYear,  "aguse"+landuseYear, "povpct"+landuseYear, "top3_"+landuseYear, "bot3_"+landuseYear,"sc"+landuseYear,"cntsc"+landuseYear,"cropct"+landuseYear,"pctsc"+landuseYear,"AREA_SQKM" ]
             print "cursorFields: {0}".format(",".join(cursorFields))
         else:
-            cursorFields = ["cnt"+landuseYear,  "aguse"+landuseYear, "top3_"+landuseYear, "bot3_"+landuseYear,"sc"+landuseYear,"cntsc"+landuseYear]
+            cursorFields = ["cnt"+landuseYear,  "aguse"+landuseYear, "top3_"+landuseYear, "bot3_"+landuseYear,"sc"+landuseYear,"cntsc"+landuseYear,"cropct"+landuseYear,"pctsc"+landuseYear,"AREA_SQKM"]
         with arcpy.da.UpdateCursor(outputFeatureClassName, cursorFields,  where_clause=updateSearchWhereClause) as cursor:
             for row in cursor:
                 cursorCount +=1
                 row[0] = txCountyCountSum
                 row[1] = txCountyAgUseString
                 if (povertyYear != ""):
-                    row[2] = float(txCountyPovPct)
+                    row[2] = float(txCountyPovPct)                
                 if (int(landuseYear) > 2006 and int(landuseYear) < 2016 ):
                     row[3] = top3String
                     row[4] = bottom3String
@@ -163,7 +163,19 @@ def processAnnualData(landuseYear, povertyYear, txCountyLayer, txCountyName, out
                     row[3] = bottom3String
                     row[4] = specialCropString
                     row[5] = specialCropCountSum
+                #normalize
+                if (int(landuseYear) == 1992 or int(landuseYear) == 2001):
+                    row[3] = normalize(txCountyCountSum, float(row[4]))
+                elif (int(landuseYear) == 2006):
+                    row[2] = normalize(txCountyCountSum, float(row[3]))
+                elif (int(landuseYear) > 2006 and int(landuseYear) < 2016 ):
+                    row[7] = normalize(txCountyCountSum, float(row[9]))
+                    row[8] = normalize(specialCropCountSum, float(row[9]))
+                elif (int(landuseYear) == 2016 or int(landuseYear) == 2017):
+                    row[6] = normalize(txCountyCountSum, float(row[8]))
+                    row[7] = normalize(specialCropCountSum, float(row[8]))
                 #Update output feature class
+                    
                 cursor.updateRow(row)
     except Exception as e:
         print "Exception caught in UpdateCursor: {0}".format(e.args[0])
@@ -173,6 +185,13 @@ def processAnnualData(landuseYear, povertyYear, txCountyLayer, txCountyName, out
         arcpy.Delete_management(outputName)
     except Exception as e:
         print "Exception caught deleting temporary clipped output feature {0}".format(e.args[0])
+
+def normalize(cropLandUseCount, areaSQKM):
+    print "normalizeCropLan(cropLandUseCount: {0}, areaSQKM: {1}".format(cropLandUseCount, areaSQKM)
+    cropLandUsePercent = ((cropLandUseCount * 900) /1000000) / areaSQKM
+    print "cropLandUsePercent {0}".format(cropLandUsePercent)
+    return cropLandUsePercent
+    
 
 def isSpecialtyCrop(cropName):
     print "cropName: {0}".format(cropName)
