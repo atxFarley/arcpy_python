@@ -226,7 +226,7 @@ if(boolLicenseAvail):
                                 pctsc2008 = float(row[21])
                                 pctsc2017 = float(row[22])
                                 pctscdiff = (pctsc2017 - pctsc2008)
-                                row[21] = pctscdiff
+                                row[23] = pctscdiff
                                 
                                 #Update output feature class
                                 cursor.updateRow(row)
