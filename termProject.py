@@ -100,7 +100,7 @@ if(boolLicenseAvail):
                             fieldLen=50
                             fieldPrecision=9
                             fieldScale=2
-                            if ((newFieldName.find("aguse") > -1) or ((newFieldName.find("sc") > -1) and (newFieldName != "cntscdiff")) or (newFieldName.find("top") > -1) or (newFieldName.find("bot") > -1)):
+                            if ((newFieldName.find("aguse") > -1) or ((newFieldName.find("sc") > -1) and (newFieldName != "cntscdiff") and (newFieldName.find("cntsc") < 0) and (newFieldName.find("pctsc") < 0)) or (newFieldName.find("top") > -1) or (newFieldName.find("bot") > -1)):
                                 fieldType="TEXT"
                                 fieldLen=1000
                             print "New field {0}, type {1}, length {2}".format(newFieldName, fieldType, fieldLen)
